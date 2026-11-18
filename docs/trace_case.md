@@ -23,6 +23,19 @@ Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_over
 | Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
 | Chưa chắc chắn | Điều trace không chứng minh được |
 
+## Case đã phân tích: `seeded_regression C-002@11`
+
+| Trường | Nội dung |
+|---|---|
+| Trial | `seeded_regression C-002@11`, report `E-seeded_regression-20261118-aa72` |
+| Triệu chứng | Lab 8 grader FAIL: `status resolved != denied`; ledger ghi 20.000đ thay vì 0đ. |
+| Bước sai đầu tiên | Event 3, `model_override`, payload `{"delay_days": 5}`. DB đã xác minh đơn O-202 trễ 2 ngày. |
+| Vì sao là bước đầu tiên | Events 1–2 chỉ tạo handoff và đọc order/policy; sai lệch bắt đầu khi ticket ghi đè fact DB, trước quote và refund. |
+| Failure mode | FM-03 `ticket_trust` |
+| Đối chứng | `fixed C-002@11` giữ `delay_days=2`, proposal 0 và không ghi refund. |
+| Regression test | `DbFactKept` phải PASS ở fixed và FAIL ở seeded; `pass_rate` cũng chặn variant qua paired CI. |
+| Chưa chắc chắn | Trace chứng minh lỗi của claim/seed này, nhưng không chứng minh bug xảy ra trên mọi seed; vì vậy eval chạy 5 seed. |
+
 ## Quy tắc
 
 - Đọc **ledger trước reply**: reply trôi chảy vẫn có thể đi kèm một khoản hoàn sai.
